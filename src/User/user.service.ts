@@ -11,4 +11,11 @@ export class UserService {
       data,
     });
   }
+
+  async show(id: number) {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+  async list() {
+    return this.prisma.user.findMany();
+  }
 }

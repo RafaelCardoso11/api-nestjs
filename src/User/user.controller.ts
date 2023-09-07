@@ -20,17 +20,12 @@ export class UserController {
 
   @Get()
   async list() {
-    return {
-      users: [],
-    };
+    return this.userService.list();
   }
 
   @Get(':id')
   async show(@Param('id', ParseIntPipe) id) {
-    return {
-      id,
-      user: {},
-    };
+    return this.userService.show(id);
   }
 
   @Post()
