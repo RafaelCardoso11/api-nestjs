@@ -9,7 +9,7 @@ export class UserService {
 
   async create(data: CreateUserDTO) {
     return this.prisma.user.create({
-      data,
+      data: { ...data, birthAt: data.birthAt ? new Date(data.birthAt) : null },
     });
   }
 
@@ -22,7 +22,7 @@ export class UserService {
   async update(id: number, data: UpdatePutUserDTO) {
     await this.exists(id);
     return this.prisma.user.update({
-      data,
+      data: { ...data, birthAt: data.birthAt ? new Date(data.birthAt) : null },
       where: {
         id,
       },

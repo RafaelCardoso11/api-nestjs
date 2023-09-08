@@ -29,8 +29,8 @@ export class UserController {
   }
 
   @Post()
-  async create(@Body() { name, password, email }: CreateUserDTO) {
-    return this.userService.create({ name, password, email });
+  async create(@Body() body: CreateUserDTO) {
+    return this.userService.create(body);
   }
 
   @Put(':id')
@@ -41,9 +41,9 @@ export class UserController {
   @Patch(':id')
   async updatePartial(
     @Param('id', ParseIntPipe) id,
-    @Body() { email, name, password }: UpdatePatchUserDTO,
+    @Body() { email, birthAt, name, password }: UpdatePatchUserDTO,
   ) {
-    return this.userService.update(id, { email, name, password });
+    return this.userService.update(id, { email, birthAt, name, password });
   }
 
   @Delete(':id')
