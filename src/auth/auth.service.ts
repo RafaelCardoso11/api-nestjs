@@ -74,11 +74,9 @@ export class AuthService {
     return true;
   }
 
-  async resetPassword({ password, token }: AuthResetPasswordDTO) {
-    const dataToken = this.verifyToken(token);
-    const idUser = dataToken.id;
+  async resetPassword({ password, id }: AuthResetPasswordDTO) {
     const user = await this.prisma.user.update({
-      where: { id: idUser },
+      where: { id },
       data: {
         password,
       },
