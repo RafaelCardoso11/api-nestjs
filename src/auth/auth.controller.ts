@@ -5,6 +5,7 @@ import { AuthForgetDTO } from './dto/auth-forget.dto';
 import { AuthResetPasswordDTO } from './dto/auth-reset-password.dto';
 import { AuthService } from './auth.service';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { UserByRequest } from 'src/decorators/user-by-request.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -32,9 +33,9 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('/verifyToken')
-  async me(@Request() req) {
+  async me(@UserByRequest() user) {
     return {
-      ...req.tokenPayload,
+      user,
     };
   }
 }
