@@ -20,6 +20,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/role.enum';
 import { RoleGuard } from 'src/guards/role.guard';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { HashPipe } from 'src/pipes/hash.pipe';
 
 @Roles(Role.Admin)
 @UseGuards(AuthGuard, RoleGuard)
@@ -39,7 +40,7 @@ export class UserController {
   }
 
   @Post()
-  async create(@Body() body: CreateUserDTO) {
+  async create(@Body(new HashPipe('password')) body: CreateUserDTO) {
     return this.userService.create(body);
   }
 
@@ -51,7 +52,8 @@ export class UserController {
   @Patch(':id')
   async updatePartial(
     @Param('id', ParseIntPipe) id,
-    @Body() { email, birthAt, name, password, role }: UpdatePatchUserDTO,
+    @Body(new HashPipe('password'))
+    { email, birthAt, name, password, role }: UpdatePatchUserDTO,
   ) {
     return this.userService.update(id, {
       email,
