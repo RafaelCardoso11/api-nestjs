@@ -23,7 +23,7 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async createToken(user: User) {
+  createToken(user: User) {
     return this.JWTService.sign(
       {
         id: user.id,
@@ -39,7 +39,7 @@ export class AuthService {
     );
   }
 
-  async verifyToken(token: string) {
+  verifyToken(token: string) {
     try {
       const data = this.JWTService.verify(token, {
         audience: this.audience,
@@ -48,7 +48,6 @@ export class AuthService {
 
       return data;
     } catch (error) {
-      console.error(error);
       throw new BadRequestException('Token Invalid');
     }
   }
@@ -76,7 +75,7 @@ export class AuthService {
   }
 
   async resetPassword({ password, token }: AuthResetPasswordDTO) {
-    const dataToken = await this.verifyToken(token);
+    const dataToken = this.verifyToken(token);
     const idUser = dataToken.id;
     const user = await this.prisma.user.update({
       where: { id: idUser },
@@ -85,13 +84,17 @@ export class AuthService {
       },
     });
 
-    const newToken = await this.createToken(user);
+    const newToken = this.createToken(user);
 
     return { token: newToken, ...user };
   }
 
   async register(data: AuthRegisterDTO) {
     const user = await this.userService.create(data);
-    return this.createToken(user);
+
+    const token = this.createToken(user);
+    return {
+      token,
+    };
   }
 }
