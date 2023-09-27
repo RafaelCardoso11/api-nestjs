@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 
 export const UserByRequest = createParamDecorator(
-  (_, context: ExecutionContext) => {
+  (filter: string, context: ExecutionContext) => {
     const request = context.switchToHttp().getRequest();
 
     const user = request.user;
@@ -13,6 +13,11 @@ export const UserByRequest = createParamDecorator(
     if (!user) {
       throw new NotFoundException('Usuário não encontrado na request.');
     }
+
+    if (filter) {
+      return request.user[filter];
+    }
+
     return request.user;
   },
 );
