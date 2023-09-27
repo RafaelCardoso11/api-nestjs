@@ -11,7 +11,7 @@ import { AuthResetPasswordDTO } from './dto/auth-reset-password.dto';
 import { User } from '@prisma/client';
 import { AuthRegisterDTO } from './dto/auth-register.dto';
 import { UserService } from 'src/user/user.service';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   private audience = 'users';
@@ -52,15 +52,21 @@ export class AuthService {
     }
   }
 
-  async login(data: AuthLoginDTO) {
-    const user = await this.prisma.user.findFirst({ where: data });
-
-    if (!user) {
+  async login({ email, password }: AuthLoginDTO) {
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: {
+          email,
+        },
+      });
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (isValidPassword) {
+        const token = this.createToken(user);
+        return { token, ...user };
+      }
+    } catch (error) {
       throw new UnauthorizedException('Email e/ou senha incorretos');
     }
-
-    const token = await this.createToken(user);
-    return { token, ...user };
   }
 
   async forget(data: AuthForgetDTO) {
