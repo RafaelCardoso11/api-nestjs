@@ -12,6 +12,9 @@ import { User } from '@prisma/client';
 import { AuthRegisterDTO } from './dto/auth-register.dto';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
+import { FileService } from 'src/file/file.service';
+import { PathLike } from 'fs';
+import { extname, join } from 'path';
 @Injectable()
 export class AuthService {
   private audience = 'users';
@@ -21,6 +24,7 @@ export class AuthService {
     private readonly JWTService: JwtService,
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
+    private readonly fileService: FileService,
   ) {}
 
   createToken(user: User) {
@@ -100,5 +104,68 @@ export class AuthService {
     return {
       token,
     };
+  }
+  async uploadPhoto(user: User, file: Express.Multer.File) {
+    const extension = file.originalname.slice(
+      file.originalname.lastIndexOf('.') + 1,
+      file.originalname.length,
+    );
+    const path = join(
+      __dirname,
+      '../../',
+      'storage',
+      'photos',
+      `perfil-${user.id}-${user.name}.${extension}`,
+    );
+
+    try {
+      await this.fileService.upload(path, file.buffer);
+      return {
+        sucess: true,
+      };
+    } catch (error) {
+      return new BadRequestException(
+        'Erro ao tentar fazer o Upload do arquivo',
+      );
+    }
+  }
+  async uploadFiles(user: User, file: Express.Multer.File[]) {
+    try {
+      for (let index = 0; index < file.length; index++) {
+        const path = join(
+          __dirname,
+          '../../',
+          'storage',
+          'photos',
+          `perfil-${user.id}-${user.name}${index}${file[index].originalname}`,
+        );
+        await this.fileService.upload(path, file[index].buffer);
+      }
+      return {
+        sucess: true,
+      };
+    } catch (error) {
+      return new BadRequestException(
+        'Erro ao tentar fazer os Uploads dos arquivos',
+      );
+    }
+  }
+
+  async downloadPhoto(user: User, extension: string) {
+    const path = join(
+      __dirname,
+      '../../',
+      'storage',
+      'photos',
+      `perfil-${user.id}-${user.name}.${extension}`,
+    );
+
+    try {
+      return await this.fileService.download(path);
+    } catch (error) {
+      throw new BadRequestException(
+        'Erro ao tentar fazer o Download do arquivo',
+      );
+    }
   }
 }
